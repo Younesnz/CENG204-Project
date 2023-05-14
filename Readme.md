@@ -2,7 +2,7 @@
 
 This is the repository for our System Programming Term Project.
 
-### Project Description
+## Project Description
 
 > **Project Title:** A command line shell application (supporting basic commands like cd, ls, cat, rm, etc.).
 
@@ -15,7 +15,7 @@ Group Members:
 
 Supervisor: Dr. Hüsam Yasin
 
-### Project Structure
+## Project Structure
 
 this project is coded in C programming language using Microsoft Visual Studio 2022 and it's compatible with the Windows environment.
 
