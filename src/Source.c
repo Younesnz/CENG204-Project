@@ -15,6 +15,7 @@ void ListDirectoryContents(const char*);
 void listFiles();
 void change_directory(char*);
 void cat(char*);
+void remove_file(const char*);
 void process_user_input(char*);
 
 void welcomeMsg(void);
@@ -32,7 +33,7 @@ int main(void) {
     char input[1024];
     while (1) {
         printCWD();
-        printf("Enter Your Command (ls, cd, )\n > ");
+        printf("Enter Your Command (ls, cd, cat)\n > ");
         fgets(input, sizeof(input), stdin);
 
         // remove newline character from user input
@@ -44,7 +45,6 @@ int main(void) {
     getchar();
 	return 0;
 }
-
 void process_user_input(char* input) {
     // check if the input starts with "cd"
     if (strncmp(input, "cd", 2) == 0) {
@@ -65,6 +65,14 @@ void process_user_input(char* input) {
 
         // call the cat function with the filename
         cat(filename);
+    }
+    // check if the input starts with "rm"
+    else if (strncmp(input, "rm", 2) == 0) {
+        // extract the file or directory path from the input string
+        char* path = input + 3; // skip the "rm " prefix
+
+        // call the rm function with the path
+        remove_file(path);
     }
     else {
         // handle other commands here
@@ -207,6 +215,18 @@ void cat(char* filename) {
     fclose(file);
 }
 
+void remove_file(const char* filename) {
+    char cmd[1024];
+    sprintf_s(cmd, sizeof(cmd), "del /q \"%s\"", filename);
+    int status = system(cmd);
+    if (status == 0) {
+        printf("File '%s' deleted successfully.\n", filename);
+    }
+    else {
+        printf("Error deleting file '%s'.\n", filename);
+    }
+}
+
 //void change_directory(char* dir_path) {
 //    char newDir[MAX_PATH];
 //
@@ -331,7 +351,7 @@ void welcomeMsg(void) {
 	for (int i = 0; i < 4; i++) {
 		printf(" %-32s %s\n", names[i], sNums[i]);
 	}
-	printf("\nPress Any Key to Start the CLI >> ");
+	printf("\nPress ENTER to Start the CLI >> ");
 	getchar();
 	system("cls");
 	return;
