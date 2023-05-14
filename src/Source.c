@@ -3,14 +3,18 @@
 #include <string.h>
 #include <limits.h>
 #include <windows.h>
+#include <io.h>
 
 #define PATH_MAX 4096
+
 
 char* getCWD(void);
 void printCWD(void);
 void list_dir(const char*);
 void ListDirectoryContents(const char*);
 void listFiles();
+void change_directory(char*);
+void process_user_input(char*);
 
 void welcomeMsg(void);
 void printLine(int);
@@ -24,8 +28,36 @@ int main(void) {
 	welcomeMsg();
     printCWD();
     listFiles();
+
+    // read user input from command line and process it
+    char input[1024];
+    while (1) {
+        printf("> ");
+        fgets(input, sizeof(input), stdin);
+
+        // remove newline character from user input
+        input[strcspn(input, "\n")] = 0;
+
+        process_user_input(input);
+    }
+
     getchar();
 	return 0;
+}
+
+void process_user_input(char* input) {
+    // check if the input starts with "cd"
+    if (strncmp(input, "cd", 2) == 0) {
+        // extract the directory path from the input string
+        char* dir_path = input + 3;  // skip the "cd " prefix
+
+        // call the change_directory function with the directory path
+        change_directory(dir_path);
+    }
+    else {
+        // handle other commands here
+        printf("Unsupported command\n");
+    }
 }
 
 void printCWD() {
@@ -113,6 +145,77 @@ void listFiles() {
     // Close the pipe
     _pclose(fp);
 }
+
+void change_directory(char* dir_path) {
+    printf("Dir: %s",currentDir);
+    char newDir[MAX_PATH];
+
+    // if the user input is "..", move up one directory
+    if (strcmp(dir_path, "..") == 0) {
+        char* last_slash = strrchr(currentDir, '\\');
+        if (last_slash != NULL) {
+            *last_slash = '\0';
+        }
+        return;
+    }
+
+    // get the full path of the target directory
+    if (_fullpath(newDir, dir_path, MAX_PATH) == NULL) {
+        fprintf(stderr, "Error: could not get full path for directory '%s'\n", dir_path);
+        return;
+    }
+
+    // check if the target directory exists and is a directory
+    if (_chdir(newDir) != 0) {
+        fprintf(stderr, "Error: could not change directory to '%s'\n", newDir);
+        return;
+    }
+
+    
+    // update the global variable with the new current directory
+    if (_getcwd(currentDir, MAX_PATH) == NULL) {
+        fprintf(stderr, "Error: could not get current directory\n");
+        exit(1);
+    }
+    printf("Dir: %s", currentDir);
+}
+
+//void change_directory(char* dir_path) {
+//    char newDir[MAX_PATH];
+//
+//    // if the user input is "..", move up one directory
+//    if (strcmp(dir_path, "..") == 0) {
+//        char* last_slash = strrchr(currentDir, '\\');
+//        if (last_slash != NULL) {
+//            *last_slash = '\0';
+//        }
+//        return;
+//    }
+//
+//    // concatenate the target directory with the current directory to get the full path
+//    snprintf(newDir, sizeof(newDir), "%s\\%s", currentDir, dir_path);
+//
+//    // check if the target directory exists
+//    WIN32_FIND_DATA findData;
+//    HANDLE handle = FindFirstFile(newDir, &findData);
+//    if (handle == INVALID_HANDLE_VALUE) {
+//        fprintf(stderr, "Error: directory '%s' does not exist\n", newDir);
+//        return;
+//    }
+//    FindClose(handle);
+//
+//    // change the current directory to the target directory
+//    if (SetCurrentDirectory(newDir) == 0) {
+//        fprintf(stderr, "Error: could not change directory to '%s'\n", newDir);
+//        return;
+//    }
+//
+//    // update the global variable with the new current directory
+//    if (GetCurrentDirectory(sizeof(currentDir), currentDir) == 0) {
+//        fprintf(stderr, "Error: could not get current directory\n");
+//        exit(1);
+//    }
+//}
 
 //void listFiles()
 //{
