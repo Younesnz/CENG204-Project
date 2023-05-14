@@ -14,6 +14,7 @@ void list_dir(const char*);
 void ListDirectoryContents(const char*);
 void listFiles();
 void change_directory(char*);
+void cat(char*);
 void process_user_input(char*);
 
 void welcomeMsg(void);
@@ -26,13 +27,12 @@ int main(void) {
     currentDir = getCWD();
 
 	welcomeMsg();
-    printCWD();
-    listFiles();
-
+    
     // read user input from command line and process it
     char input[1024];
     while (1) {
-        printf("> ");
+        printCWD();
+        printf("Enter Your Command (ls, cd, )\n > ");
         fgets(input, sizeof(input), stdin);
 
         // remove newline character from user input
@@ -54,11 +54,24 @@ void process_user_input(char* input) {
         // call the change_directory function with the directory path
         change_directory(dir_path);
     }
+    // check if the input starts with "ls"
+    else if (strncmp(input, "ls", 2) == 0) {
+        listFiles();
+    }
+    // check if the input starts with "cat"
+    else if (strncmp(input, "cat", 3) == 0) {
+        // extract the filename from the input string
+        char* filename = input + 4;  // skip the "cat " prefix
+
+        // call the cat function with the filename
+        cat(filename);
+    }
     else {
         // handle other commands here
         printf("Unsupported command\n");
     }
 }
+
 
 void printCWD() {
 
@@ -107,13 +120,12 @@ char* getCWD() {
 //    system(command);
 //}
 void listFiles() {
-    char* cwd = getCWD();
     char command[MAX_PATH + 6];  // MAX_PATH + length of "dir /b " and null terminator
     char buffer[4096];
     FILE* fp;
 
     // Build the command string
-    sprintf_s(command, MAX_PATH + 6, "dir /b /a \"%s\"", cwd);
+    sprintf_s(command, MAX_PATH + 6, "dir /b /a \"%s\"", currentDir);
 
     // Open a pipe to the command prompt and execute the command
     fp = _popen(command, "r");
@@ -147,8 +159,7 @@ void listFiles() {
 }
 
 void change_directory(char* dir_path) {
-    printf("Dir: %s",currentDir);
-    char newDir[MAX_PATH];
+    char newDir[MAX_PATH] = "";
 
     // if the user input is "..", move up one directory
     if (strcmp(dir_path, "..") == 0) {
@@ -171,13 +182,29 @@ void change_directory(char* dir_path) {
         return;
     }
 
-    
     // update the global variable with the new current directory
     if (_getcwd(currentDir, MAX_PATH) == NULL) {
         fprintf(stderr, "Error: could not get current directory\n");
         exit(1);
     }
-    printf("Dir: %s", currentDir);
+}
+
+void cat(char* filename) {
+    FILE* file = NULL;
+    errno_t err;
+
+    err = fopen_s(&file, filename, "r");
+    if (err != 0 || file == NULL) {
+        printf("Error: could not open file \"%s\"\n", filename);
+        return;
+    }
+
+    char line[256];
+    while (fgets(line, sizeof(line), file)) {
+        printf("%s", line);
+    }
+
+    fclose(file);
 }
 
 //void change_directory(char* dir_path) {
