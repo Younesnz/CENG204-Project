@@ -10,12 +10,15 @@
 
 char* getCWD(void);
 void printCWD(void);
-void list_dir(const char*);
-void ListDirectoryContents(const char*);
+//void list_dir(const char*);
+//void ListDirectoryContents(const char*);
 void listFiles();
 void change_directory(char*);
 void cat(char*);
 void remove_file(const char*);
+void mymkdir(char*);
+void create_file(const char*);
+
 void process_user_input(char*);
 
 void welcomeMsg(void);
@@ -33,7 +36,7 @@ int main(void) {
     char input[1024];
     while (1) {
         printCWD();
-        printf("Enter Your Command (ls, cd, cat)\n > ");
+        printf("Enter Your Command (ls, cd, cat, rm, mkdir, touch, clear)\n > ");
         fgets(input, sizeof(input), stdin);
 
         // remove newline character from user input
@@ -74,11 +77,31 @@ void process_user_input(char* input) {
         // call the rm function with the path
         remove_file(path);
     }
+    // check if the input starts with "mkdir"
+    else if (strncmp(input, "mkdir", 5) == 0) {
+        // extract the directory name from the input string
+        char* dir_name = input + 6; // skip the "mkdir " prefix
+
+        // call the mymkdir function with the directory name
+        mymkdir(dir_name);
+    }
+    else if (strncmp(input, "touch", 5) == 0) {
+        // extract the directory name from the input string
+        char* dir_name = input + 6; // skip the "mkdir " prefix
+
+        // call the mymkdir function with the directory name
+        create_file(dir_name);
+    }
+    else if (strncmp(input, "clear", 5) == 0) {
+        system("cls");
+
+    }
     else {
         // handle other commands here
         printf("Unsupported command\n");
     }
 }
+
 
 
 void printCWD() {
@@ -224,6 +247,30 @@ void remove_file(const char* filename) {
     }
     else {
         printf("Error deleting file '%s'.\n", filename);
+    }
+}
+
+void mymkdir(char* dir_name) {
+    char command[100];
+    snprintf(command, sizeof(command), "mkdir \"%s\"", dir_name);
+    int status = system(command);
+    if (status != 0) {
+        printf("Failed to create directory \"%s\"\n", dir_name);
+    }
+    else {
+        printf("Directory \"%s\" created successfully\n", dir_name);
+    }
+}
+
+void create_file(const char* filename) {
+    char command[100];
+    snprintf(command, sizeof(command), "type NUL > \"%s\"", filename);
+    int status = system(command);
+    if (status != 0) {
+        printf("Failed to create file \"%s\"\n", filename);
+    }
+    else {
+        printf("File \"%s\" created successfully\n", filename);
     }
 }
 
