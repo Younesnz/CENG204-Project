@@ -19,7 +19,7 @@ Supervisor: Dr. Hüsam Yasin
 
 this project is coded in C programming language using Microsoft Visual Studio 2022 and it's compatible with the Windows environment.
 
-please find the source code in the src folder and the presentation document in the presentation folder.
+please find the source code in the src folder and the presentation document as a PDF file.
 the complete report of the project is provided in Report.md file.
 
 please contact us if you have any problem with the project or other files.
